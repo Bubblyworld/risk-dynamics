@@ -5,22 +5,55 @@
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{amsfonts}
+\usepackage[scr]{rsfso} %Adds some math font stuff, like the Weierstrauss Powerset `P'.
 \usepackage{amsthm}
 \usepackage{graphicx}
 \usepackage{tikz}
 \include{macros}
+\usepackage{bm} %Lets you type bold mathematics. Nice for definitions.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%New functions and shortcuts
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\ol}[1]{\overline{#1}}
+
+\def\PS{\ensuremath\mathscr{P}}
+\def\gst{\ensuremath\gamma_{str}}
+\def\gse{\ensuremath\gamma_{sec}}
+\def\N{\ensuremath\mathbb{N}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Theorem Styling
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\theoremstyle{plain}
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{conj}[thm]{Conjecture}
+
+\theoremstyle{definition}
+\newtheorem{obs}[thm]{Observation}
+\newtheorem{rem}[thm]{Remark}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Document Styling --- Feel free to change these
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setlength{\parindent}{0pt}
+\linespread{1.3} %1 is default. 1.3 is `one and a half' spacing. 1.6 is `double spacing'.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \title{Territory and Conquest}
-\author{Braden do Perez, Guy Paterson-Jones}
+\author{Brandon du Preez, Guy Paterson-Jones}
 
 \maketitle
 
 \begin{abstract}
-  A study of a dynamical system on graphs that models territory control and conquest, loosely based on the board game \emph{Risk}. Every vertex is controlled by one of two players (black and white), and at each turn a vertex can change ownership based on influence from neighbouring vertices. Despite having somewhat simple rules, we describe a number of elusive conjectures about these dyamical systems that we are unable to prove. \cite{KrausEtAl1990}
+  \noindent A study of a dynamical system on graphs that models territory control and conquest, loosely based on the board game \emph{Risk}. Every vertex is controlled by one of two players (black and white), and at each turn a vertex can change ownership based on influence from neighbouring vertices. Despite having somewhat simple rules, we describe a number of elusive conjectures about these dynamical systems that we are unable to prove. \cite{KrausEtAl1990}
 \end{abstract}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -66,11 +99,12 @@ In these notes, we describe a simplified graph-theoretic model of a game of Risk
   \end{tikzpicture}
 \end{center}
 
-For simplicity, we will focus on the version of the model with two players, represented by the colours black and white. Nevertheless, the model hides a surprising amount of complexity. For instance, if one takes any finite black/white labelled graph and repeatedly applies the update function to it, one of two things eventually happens:
+For simplicity, we will focus on the version of the model with two players, represented by the colours black and white. Nevertheless, the model hides a surprising amount of complexity. For instance, if one takes any finite black/white labelled graph and repeatedly applies the update function to it, one of three things eventually happens:
 
 \begin{enumerate}
   \item The graph becomes monochromatic, i.e. one of the players wins.
-  \item The graph settles into a periodic cycle, i.e. the same states keep occuring.
+  \item The graph is locked in a single state with both black and white vertices, i.e., there is a `static' stalemate.
+  \item The graph settles into a periodic cycle, i.e. the same states keep occurring.
 \end{enumerate}
 
 The example we drew above is a periodic cycle of length $2$, since applying the update function repeatedly just alternates between the two graphs. In fact, \emph{every} case of a periodic cycle we've managed to come up with has length $2$! This leads us to conjecture that $2$ is the only possible length for a periodic cycle on a finite graph, but to date we have been unable to prove this.
@@ -149,6 +183,95 @@ The four combinations are then $\selfDef \wedge \tieNeu$, $\selfDef \wedge \ntie
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Notation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Basic definitions}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%This probably overlaps monstrously with the planned notation section, and what it has in brevity of definitions it somewhat lacks in clarity and quality XD
+
+Let $G = (V,E)$ be a graph of order $n$. If $S$ be a subset of $V$, then $\ol{S} = V-S$ denotes the \textbf{complement} of $S$. Define the number $\epsilon_G$ (or just $\epsilon$ if the graph is clear from context) as $\epsilon_G = \frac{n}{n+1}$.
+
+Let $G=(V,E)$ be a graph, and $f: \N \rightarrow \PS(V)$ a function. For a vertex $u$ and a natural number (henceforth called a \textbf{time}) $t$, \textbf{Bob's control of} \bm{$u$} \textbf{at time} \bm{$t$}, denoted \bm{$b_f(u, t)$}, is defined as
+\[
+b_f(u,t) = 
+\begin{cases}
+	|N[u] \cap f(t)| &\text{ if } u\notin f(t)\\
+	|N[u] \cap f(t)| + \epsilon &\text{ if } u\in f(t)\\
+\end{cases}
+\]
+
+Analogously, we define \textbf{Willow's control of} \bm{$u$} \textbf{at time} \bm{$t$}, denoted \bm{$w_f(u, t)$} as
+\[
+w_f(u,t) = 
+\begin{cases}
+|N[u] \cap \ol{f(t)}| &\text{ if } u\notin \ol{f(t)}\\
+|N[u] \cap \ol{f(t)}| + \epsilon &\text{ if } u\in \ol{f(t)}\\
+\end{cases}
+\]
+
+We will omit the subscript $f$ if the function is clear from context.
+Since the vertex $u$ lies in either $f(t)$ or $\ol{f(t)}$, we have $b(u,t) + w(u,t) = |V| + \epsilon$.
+
+A \textbf{dynamics} $f$ on $G$ is a function $f: \N \rightarrow \PS(V)$ such that for all $t \in \N$, and all $u\in V$, we have $u\in f(t+1)$ if and only if $b_f(u,t) > w_f(u,t)$. Dynamics are deterministic, in the sense that a dynamics $f$ is entirely determined by its \textbf{initial condition}, which is the set $f(0)$. Dynamics are \textbf{time-invariant}. If $f$ and $g$ are two dynamics on the same graph, and there exist times $s$ and $t$ such that $f(s) = g(t)$, then $f(s + k) = g(t + k)$ for all $k\in \N$. Finally, dynamics are symmetric in the role that Bob and Willow's vertices play. Instead of using the dynamics $f$ that provides the set of vertices under Bob's control, we could use the function $\overline{f}$, defined by $\overline{f}(t) = \overline{f(t)}$ for all $t\in \N$, which provides the set of vertices under Willow's control. Importantly, this new function $\ol{f}$ is itself a dynamics.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Basic Results}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{lem}[The Monotonicity Lemma]
+	Let $G$ be a graph, and let $f$ and $g$ be two dynamics on $G$. 
+	If there is some time $s$ such that $f(s) \subseteq g(s)$, then for all $s \leq t$, $f(t) \subseteq g(t)$.
+	\label{lem_monotonicity_lem}
+\end{lem}
+
+\begin{proof}
+	It suffices to prove that if $f(t) \subseteq g(t)$ for any time $t$, then $f(t+1) \subseteq g(t+1)$.
+	
+	Let $u$ be any vertex of $f(t+1)$. 
+	Then $b_f(u,t) > w_f(u,t)$.
+	Since $f(t) \subseteq g(t)$, we get the following chain of inequalities
+	\[
+		b_g(u,t) \geq b_f(u,t) > w_f(u,t) \geq w_g(u,t).
+	\] 
+	Therefore $u\in g(t+1)$.
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Strongholds, victory and resistance}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Let $G = (V,E)$ be a graph, $S$ a subset of $V$, and $f$ a dynamics on $G$. The set $S$ is:
+\begin{itemize}
+	\item a \textbf{stronghold} if $f(0) = S$ implies that, for all $t\in \N$, $S \subseteq f(t)$.
+	\item a \textbf{resistance set} if $f(0) = S$ implies that, for all $t\in \N$, $f(t) \neq \emptyset$.
+	\item a \textbf{victory set} if $f(0) = S$ implies that there exists $t\in \N$ such that $f(t) = V$.
+\end{itemize}
+
+The \textbf{stronghold number} of $G$, denoted $\sigma_s(G)$, is the minimum number of vertices in a persistent set. The \textbf{resistance number} $\sigma_r(G)$ and \textbf{victory number} $\sigma_v(G)$ are defined analogously. There are some easily established relationships between these parameters.
+
+\begin{prop}
+	Let $G$ be a graph of order $n$ with stronghold, resistance and victory numbers $\sigma_s, \sigma_r$ and $\sigma_v$ respectively. Then:
+	\begin{itemize}
+		\item[(1)] $\sigma_r \leq \sigma_s$,
+		\item[(2)] $\sigma_r \leq \sigma_v \leq n+1 - \sigma_r$,
+		\item[(3)] $\sigma_r \leq \frac{n+1}{2}$
+	\end{itemize}
+	For arbitrary graphs, these bounds are all sharp.
+	\label{prop_sigma_bounds}
+\end{prop}
+
+\begin{proof}
+	Inequality (1) follows from the fact that every stronghold is a resistance set.
+	
+	To obtain the left hand side of (2), observe that every victory set is a resistance set. 
+	If $S$ is not a resistance set, then its complement $\ol{S}$ is a victory set. Therefore every set containing at least $n-\sigma_r + 1$ vertices is a victory set --- yielding the right hand side of (2).
+	
+	To obtain inequality (3), add $\sigma_r$ to every term of (2), then divide by 2.
+	
+	Let $m$ be an odd natural number. Then $\sigma_s(K_m) = \sigma_r(K_m) = \sigma_v(K_m) = \frac{m+1}{2}$, demonstrating that all of the bounds are sharp for infinitely many graphs.
+\end{proof}
+
+If $u$ is a vertex of degree 1, then $\{u\}$ is a stronghold. Thus, if $G$ is a graph with $\delta(G) = 1$ (such as tree), then $\sigma_s(G) = \sigma_r(G) = 1$. However, it's possible for Bob to (eventually) control an entire tree by picking an initial condition $f(0)$ with far fewer than $n$ vertices.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bibliographystyle{unsrt}
